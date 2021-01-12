@@ -10,6 +10,8 @@ using namespace std;
 
 #define BUFSZ 1024
 
+ServerData server = ServerData();
+
 void usage() {
   cout << "usage: ./server <v4|v6> <server port>" << endl;
   cout << "example: ./server v4 51511" << endl;
@@ -66,21 +68,26 @@ void sendMessage(SocketData  *cliData, char *message) {
 }
 
 void* clientThread(void *data) {
-  SocketData *cliData = (SocketData *)data;
+  ClientData *cliData = (ClientData *)data;
 
   while (1) {
     char rcvMsgBuffer[BUFSZ];
     memset(rcvMsgBuffer, 0, BUFSZ);
-    size_t bufferLength = recv(cliData->clientSocket, rcvMsgBuffer, BUFSZ - 1, 0);
+    size_t bufferLength = recv(cliData->clientData->clientSocket, rcvMsgBuffer, BUFSZ - 1, 0);
 
     printf("[msg], %d bytes: %s\n", (int)bufferLength, rcvMsgBuffer);
     
-    string msg = "Helloo Worldd!";
-    sendMessage(cliData, &msg[0]);
+    if (bufferLength == 0) {
+      cout << "cliente desconectado" << endl;
+      break;
+    }
+    
+    // string msg = "Helloo Worldd!";
+    // sendMessage(cliData, &msg[0]);
 
   }
 
-  close(cliData->clientSocket);
+  close(cliData->clientData->clientSocket);
   pthread_exit(EXIT_SUCCESS);
 }
 
@@ -101,7 +108,10 @@ int main(int argc, char **argv) {
     }
 
     AddressData addrData = getAddressData(cliAddressData);    
-    SocketData cliData = SocketData(cliSocket, clientStorage, &addrData);
+    SocketData sockData = SocketData(cliSocket, clientStorage, &addrData);
+
+    ClientData cliData = ClientData(&sockData);
+    server.clients.push_back(&cliData);
 
     pthread_t tid;
     pthread_create(&tid, NULL, clientThread, &cliData);

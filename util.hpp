@@ -28,6 +28,22 @@ struct SocketData {
   }
 };
 
+struct ClientData {
+  SocketData *clientData;
+  vector<string> subscriptions;
+  ClientData (SocketData *clientData) {
+    this->clientData = clientData;
+    this->subscriptions = {};
+  }
+};
+
+struct ServerData {
+  vector<ClientData *> clients;
+  ServerData() {
+    this->clients = {};
+  }
+};
+
 bool addressParse(string address, string port, sockaddr_storage *storage);
 AddressData getAddressData(sockaddr *addr);
 bool initServerSockaddr(string proto, string portstr, sockaddr_storage *storage);
