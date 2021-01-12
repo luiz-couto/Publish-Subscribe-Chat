@@ -11,6 +11,7 @@ using namespace std;
 #define BUFSZ 1024
 
 ServerData server = ServerData();
+pthread_mutex_t locker;
 
 void usage() {
   cout << "usage: ./server <v4|v6> <server port>" << endl;
@@ -67,6 +68,19 @@ void sendMessage(SocketData  *cliData, char *message) {
   }
 }
 
+void removeClient(ClientData *cliData) {
+  pthread_mutex_lock(&locker); 
+  int index = 0;
+  for (index = 0; index < server.clients.size(); index++) {
+    if (server.clients[index]->clientData->clientSocket == cliData->clientData->clientSocket) {
+      break;
+    }
+  }
+
+  server.clients.erase(server.clients.begin() + index);
+  pthread_mutex_unlock(&locker);
+}
+
 void* clientThread(void *data) {
   ClientData *cliData = (ClientData *)data;
 
@@ -74,13 +88,15 @@ void* clientThread(void *data) {
     char rcvMsgBuffer[BUFSZ];
     memset(rcvMsgBuffer, 0, BUFSZ);
     size_t bufferLength = recv(cliData->clientData->clientSocket, rcvMsgBuffer, BUFSZ - 1, 0);
-
-    printf("[msg], %d bytes: %s\n", (int)bufferLength, rcvMsgBuffer);
     
     if (bufferLength == 0) {
       cout << "cliente desconectado" << endl;
+      removeClient(cliData);
       break;
     }
+
+    printf("[msg], %d bytes: %s\n", (int)bufferLength, rcvMsgBuffer);
+    
     
     // string msg = "Helloo Worldd!";
     // sendMessage(cliData, &msg[0]);
@@ -94,6 +110,7 @@ void* clientThread(void *data) {
 int main(int argc, char **argv) {
 
   validateArgs(argc, argv);
+  pthread_mutex_init(&locker, NULL);
   SocketData serverData = createServer(argv[1], argv[2]);
 
   while(1) {
