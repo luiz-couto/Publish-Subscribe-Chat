@@ -58,10 +58,8 @@ SocketData createServer(string proto, string portStr) {
 }
 
 void sendMessage(SocketData  *cliData, char *message) {
-  char msg[BUFSZ];
-  printf(msg, message);
-  size_t bufferLength = send(cliData->clientSocket, msg, strlen(msg) + 1, 0);
-  if (bufferLength != strlen(msg) + 1) {
+  size_t bufferLength = send(cliData->clientSocket, message, strlen(message) + 1, 0);
+  if (bufferLength != strlen(message) + 1) {
     perror("Error while sending message from server");
     exit(EXIT_FAILURE);
   }

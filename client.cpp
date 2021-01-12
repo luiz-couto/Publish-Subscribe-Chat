@@ -60,7 +60,7 @@ void * sendThread(void *data) {
   while(1) {
     cout << "> ";
     string message;
-    cin >> message;
+    getline(cin, message);
     if (!sendMessage(clientData, message)) {
       break;
     }
@@ -70,23 +70,16 @@ void * sendThread(void *data) {
 
 void * receiveThread(void *data) {
   SocketData *clientData = (SocketData *)data;
-  char buf[BUFSZ];
-  memset(buf, 0, BUFSZ);
 
-  while(1) {
-    memset(buf, 0, BUFSZ);
-    size_t count;
-    unsigned total = 0;
-	  while(1) {
-      count = recv(clientData->clientSocket, buf + total, BUFSZ - total, 0);
-      if (count == 0) {
-        break;
-      }
-		  total += count;
-	  }
+  while (1) {
+    char rcvMsgBuffer[BUFSZ];
+    memset(rcvMsgBuffer, 0, BUFSZ);
+    size_t bufferLength = recv(clientData->clientSocket, rcvMsgBuffer, BUFSZ - 1, 0);
+
+    printf("[msg], %d bytes: %s\n", (int)bufferLength, rcvMsgBuffer);
+
   }
 
-  cout << buf << endl;
   pthread_exit(NULL);
 }
 
