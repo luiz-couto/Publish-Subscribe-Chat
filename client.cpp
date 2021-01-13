@@ -58,7 +58,7 @@ bool sendMessage(SocketData *clientData, string message) {
 void * sendThread(void *data) {
   SocketData *clientData = (SocketData *)data;
   while(1) {
-    cout << "> ";
+    // cout << "> ";
     string message;
     getline(cin, message);
     if (!sendMessage(clientData, message)) {
@@ -81,7 +81,7 @@ void * receiveThread(void *data) {
       break;
     }
 
-    printf("[msg], %d bytes: %s\n", (int)bufferLength, rcvMsgBuffer);
+    printf("< %s \n", rcvMsgBuffer);
 
   }
 

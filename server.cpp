@@ -6,6 +6,15 @@
 
 #include "util.hpp"
 
+#define INF 1000000000
+#define _ ios_base::sync_with_stdio(0);cin.tie(0);
+#define rep(i, a, b) for(int i = int(a); i < int(b); i++)
+#define debug(x) cout << #x << " = " << x << endl;
+#define debug2(x,y) cout << #x << " = " << x << " --- " << #y << " = " << y << "\n";
+#define debugA(x, l) { rep(i,0,l) { cout << x[i] << " "; } printf("\n"); }
+#define debugM( x, l, c ) { rep( i, 0, l ){ rep( j, 0, c ) cout << x[i][j] << " "; printf("\n");}}
+#define setM( x, l, c, k ) { rep( i, 0, l ){ rep( j, 0, c ) x[i][j] = k;}}
+
 using namespace std;
 
 #define BUFSZ 1024
@@ -81,32 +90,33 @@ int getMessageType(string message) {
 }
 
 bool subscribeTag(ClientData *cliData, string tag) {
-  for (int i=0; i<cliData->subscriptions.size(); i++) {
-    if (cliData->subscriptions[i] == tag) {
-      sendMessage(cliData, "< You're already subscribed in this tag!");
+  for (int i=0; i < cliData->subscriptions.size(); i++) {
+    if ((cliData->subscriptions[i]) == tag) {
+      sendMessage(cliData, "You're already subscribed in this tag!");
       return false;
     }
   }
-  cliData->subscriptions.push_back(tag);
-  sendMessage(cliData, "< Subscribed successfully!");
+  //debug(tag);
+  (cliData->subscriptions).push_back(tag);
+  sendMessage(cliData, "Subscribed successfully!");
   return true;
 }
 
 bool unsubscribeTag(ClientData *cliData, string tag) {
   bool foundTag = false;
   int i;
-  for (i=0; i<cliData->subscriptions.size(); i++) {
-    if (cliData->subscriptions[i] == tag) {
+  for (i=0; i < cliData->subscriptions.size(); i++) {
+    if ((cliData->subscriptions[i]) == tag) {
       foundTag = true;
       break;
     }
   }
   if (!foundTag) {
-    sendMessage(cliData, "< You're not subscribed in this tag!");
+    sendMessage(cliData, "You're not subscribed in this tag!");
     return false;
   }
   cliData->subscriptions.erase(cliData->subscriptions.begin() + i);
-  sendMessage(cliData, "< Unsubscribed successfully!");
+  sendMessage(cliData, "Unsubscribed successfully!");
   return true;
 }
 
@@ -164,18 +174,24 @@ vector<string> getTagsFromMsg(string str) {
 }
 
 bool isSubscribed(ClientData *cliData, vector<string> tags) {
+  //debug(cliData->subscriptions.size());
+  //debugA(cliData->subscriptions, cliData->subscriptions.size());
   bool isSub = false;
   for (auto it = tags.begin(); it != tags.end(); it++) {
-    if (find(cliData->subscriptions.begin(), cliData->subscriptions.end(), (*it)) != cliData->subscriptions.end()) {
-      return true;
+    for (int i=0; i<cliData->subscriptions.size(); i++) {
+      if ((cliData->subscriptions[i]) == (*it)) {
+        return true;
+      }
     }
   }
   return false;
 }
 
 void sendMessageToSubscribers(vector<string> tags, string msg, ClientData *cliData) {
+  debugA(tags, tags.size());
   for (auto it = server.clients.begin(); it != server.clients.end(); it++ ) {    
     if (isSubscribed((*it), tags)) {
+      cout << "PASSOU AQ" << endl;
       sendMessage((*it), msg);
     }
   }
@@ -216,9 +232,9 @@ void removeClient(ClientData *cliData) {
 
 void* clientThread(void *data) {
   ClientData *cliData = (ClientData *)data;
+  char rcvMsgBuffer[BUFSZ];
 
   while (1) {
-    char rcvMsgBuffer[BUFSZ];
     memset(rcvMsgBuffer, 0, BUFSZ);
     size_t bufferLength = recv(cliData->clientData->clientSocket, rcvMsgBuffer, BUFSZ - 1, 0);
     
