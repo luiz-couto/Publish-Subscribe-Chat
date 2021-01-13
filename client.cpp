@@ -76,6 +76,11 @@ void * receiveThread(void *data) {
     memset(rcvMsgBuffer, 0, BUFSZ);
     size_t bufferLength = recv(clientData->clientSocket, rcvMsgBuffer, BUFSZ - 1, 0);
 
+    if (bufferLength == 0) {
+      cout << "Servidor desconectado" << endl;
+      break;
+    }
+
     printf("[msg], %d bytes: %s\n", (int)bufferLength, rcvMsgBuffer);
 
   }
