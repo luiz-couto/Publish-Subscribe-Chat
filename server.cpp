@@ -92,13 +92,14 @@ int getMessageType(string message) {
 bool subscribeTag(ClientData *cliData, string tag) {
   for (int i=0; i < cliData->subscriptions.size(); i++) {
     if ((cliData->subscriptions[i]) == tag) {
-      sendMessage(cliData, "You're already subscribed in this tag!");
+      sendMessage(cliData, "already subscribed +" + tag);
       return false;
     }
   }
   //debug(tag);
   (cliData->subscriptions).push_back(tag);
-  sendMessage(cliData, "Subscribed successfully!");
+
+  sendMessage(cliData, "subscribed +" + tag);
   return true;
 }
 
@@ -112,11 +113,11 @@ bool unsubscribeTag(ClientData *cliData, string tag) {
     }
   }
   if (!foundTag) {
-    sendMessage(cliData, "You're not subscribed in this tag!");
+    sendMessage(cliData, "not subscribed -" + tag);
     return false;
   }
   cliData->subscriptions.erase(cliData->subscriptions.begin() + i);
-  sendMessage(cliData, "Unsubscribed successfully!");
+  sendMessage(cliData, "unsubscribed -" + tag);
   return true;
 }
 
