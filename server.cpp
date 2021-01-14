@@ -21,6 +21,7 @@ using namespace std;
 #define NORMAL 0
 #define SUBSCRIBE 1
 #define UNSUBSCRIBE 2
+#define KILL 3
 
 ServerData server = ServerData();
 pthread_mutex_t locker;
@@ -85,6 +86,8 @@ int getMessageType(string message) {
     return SUBSCRIBE;
   } else if (message[0] == '-' && message.length() > 1) {
     return UNSUBSCRIBE;
+  } else if (message == "##kill") {
+    return KILL;
   }
   return NORMAL;
 }
@@ -205,6 +208,9 @@ void processMessage(ClientData *cliData, string msg) {
     msg.erase(0,1);
     unsubscribeTag(cliData, msg);
   
+  } else if (msgType == KILL) {
+    exit(EXIT_SUCCESS);
+  
   } else {
     vector<string> tags = getTagsFromMsg(msg);
     size_t found = msg.find(" #");
@@ -245,7 +251,7 @@ void* clientThread(void *data) {
     processMessage(cliData, rcvMsgBuffer);
 
   }
-
+  
   close(cliData->clientData->clientSocket);
   pthread_exit(EXIT_SUCCESS);
 }
