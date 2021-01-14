@@ -174,8 +174,6 @@ vector<string> getTagsFromMsg(string str) {
 }
 
 bool isSubscribed(ClientData *cliData, vector<string> tags) {
-  //debug(cliData->subscriptions.size());
-  //debugA(cliData->subscriptions, cliData->subscriptions.size());
   bool isSub = false;
   for (auto it = tags.begin(); it != tags.end(); it++) {
     for (int i=0; i<cliData->subscriptions.size(); i++) {
@@ -188,10 +186,8 @@ bool isSubscribed(ClientData *cliData, vector<string> tags) {
 }
 
 void sendMessageToSubscribers(vector<string> tags, string msg, ClientData *cliData) {
-  debugA(tags, tags.size());
-  for (auto it = server.clients.begin(); it != server.clients.end(); it++ ) {    
+  for (auto it = server.clients.begin(); it != server.clients.end(); it++) {    
     if (isSubscribed((*it), tags)) {
-      cout << "PASSOU AQ" << endl;
       sendMessage((*it), msg);
     }
   }
@@ -270,14 +266,17 @@ int main(int argc, char **argv) {
 	    exit(EXIT_FAILURE);
     }
 
-    AddressData addrData = getAddressData(cliAddressData);    
-    SocketData sockData = SocketData(cliSocket, clientStorage, &addrData);
+    AddressData addrData = getAddressData(cliAddressData);   
+    SocketData *sockData = new SocketData(cliSocket, clientStorage, &addrData);
 
-    ClientData cliData = ClientData(&sockData);
-    server.clients.push_back(&cliData);
+    ClientData *cliData = new ClientData(sockData);
+
+    pthread_mutex_lock(&locker);
+    server.clients.push_back(cliData);
+    pthread_mutex_unlock(&locker);
 
     pthread_t tid;
-    pthread_create(&tid, NULL, clientThread, &cliData);
+    pthread_create(&tid, NULL, clientThread, cliData);
   
   }
 
