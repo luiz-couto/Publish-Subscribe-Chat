@@ -28,13 +28,13 @@ ServerData server = ServerData();
 pthread_mutex_t locker;
 
 void usage() {
-  cout << "usage: ./server <v4|v6> <server port>" << endl;
-  cout << "example: ./server v4 51511" << endl;
+  cout << "usage: ./server <server port>" << endl;
+  cout << "example: ./server 51511" << endl;
   exit(EXIT_FAILURE);
 }
 
 void validateArgs(int argc, char **argv) {
-  if (argc < 3) {
+  if (argc < 2) {
     usage();
   }
 }
@@ -274,7 +274,7 @@ int main(int argc, char **argv) {
 
   validateArgs(argc, argv);
   pthread_mutex_init(&locker, NULL);
-  SocketData serverData = createServer(argv[1], argv[2]);
+  SocketData serverData = createServer("v4", argv[1]);
 
   while(1) {
     struct sockaddr_storage clientStorage;

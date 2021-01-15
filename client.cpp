@@ -11,8 +11,8 @@ using namespace std;
 #define BUFSZ 1024
 
 void usage() {
-  cout << "usage: ./server <server IP> <server port>" << endl;
-	cout << "example: ./server 127.0.0.1 51511" << endl;
+  cout << "usage: ./client <server IP> <server port>" << endl;
+	cout << "example: ./client 127.0.0.1 51511" << endl;
 	exit(EXIT_FAILURE);
 }
 
