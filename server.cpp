@@ -18,6 +18,7 @@
 using namespace std;
 
 #define BUFSZ 1024
+#define INVALID -1
 #define NORMAL 0
 #define SUBSCRIBE 1
 #define UNSUBSCRIBE 2
@@ -73,6 +74,16 @@ SocketData createServer(string proto, string portStr) {
   return serverData;
 }
 
+bool validateString(const string& s) {
+  for (const char c : s) {
+    string str(1, c);
+    if (!isalnum(c) && !isspace(c) && str.find_first_not_of(",.?!:;+-*/=@#$%()[]{}") != string::npos) {
+      return false;
+    }
+  }
+  return true;
+}
+
 void sendMessage(ClientData  *cliData, string message) {
   size_t bufferLength = send(cliData->clientData->clientSocket, &message[0], strlen(&message[0]) + 1, 0);
   if (bufferLength != strlen(&message[0]) + 1) {
@@ -82,7 +93,9 @@ void sendMessage(ClientData  *cliData, string message) {
 }
 
 int getMessageType(string message) {
-  if (message[0] == '+' && message.length() > 1) {
+  if (!validateString(message)) {
+    return INVALID;
+  } else if (message[0] == '+' && message.length() > 1) {
     return SUBSCRIBE;
   } else if (message[0] == '-' && message.length() > 1) {
     return UNSUBSCRIBE;
@@ -99,7 +112,7 @@ bool subscribeTag(ClientData *cliData, string tag) {
       return false;
     }
   }
-  //debug(tag);
+
   (cliData->subscriptions).push_back(tag);
 
   sendMessage(cliData, "subscribed +" + tag);
@@ -211,11 +224,12 @@ void processMessage(ClientData *cliData, string msg) {
   } else if (msgType == KILL) {
     exit(EXIT_SUCCESS);
   
+  } else if (msgType == INVALID) {
+    sendMessage(cliData, "Invalid Message!");
+
   } else {
     vector<string> tags = getTagsFromMsg(msg);
-    size_t found = msg.find(" #");
-    string message = msg.substr(0, found);
-    sendMessageToSubscribers(tags, message, cliData);
+    sendMessageToSubscribers(tags, msg, cliData);
   }
 
 }
