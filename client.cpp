@@ -47,8 +47,9 @@ SocketData createSocket(string addr, string port) {
 }
 
 bool sendMessage(SocketData *clientData, string message) {
-  size_t len = send(clientData->clientSocket, &message[0], strlen(&message[0])+1, 0);
-	if (len != strlen(&message[0])+1) {
+  message = message + '\n';
+  size_t len = send(clientData->clientSocket, &message[0], strlen(&message[0]), 0);
+	if (len != strlen(&message[0])) {
 		cout << "Error while sending message" << endl;
     return false;
 	}

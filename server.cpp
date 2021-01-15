@@ -247,22 +247,52 @@ void removeClient(ClientData *cliData) {
   pthread_mutex_unlock(&locker);
 }
 
+bool checkForNewLine(string msg) {
+   for (const char c : msg) {
+    if (c == '\n') {
+      return true;
+    }
+  }
+  return false;
+}
+
 void* clientThread(void *data) {
   ClientData *cliData = (ClientData *)data;
+  
   char rcvMsgBuffer[BUFSZ];
+  string message;
+  
+  size_t bufferLength;
+  size_t msgBufferLength;
 
   while (1) {
     memset(rcvMsgBuffer, 0, BUFSZ);
-    size_t bufferLength = recv(cliData->clientData->clientSocket, rcvMsgBuffer, BUFSZ - 1, 0);
+    bufferLength = 0;
+
+    bufferLength = recv(cliData->clientData->clientSocket, rcvMsgBuffer, BUFSZ - 1, 0);
+
+    msgBufferLength += bufferLength;
+    if (msgBufferLength > 500) {
+      cout << "Client disconnect: msg too long" << endl;
+      pthread_exit(EXIT_SUCCESS);
     
-    if (bufferLength == 0) {
+    } else if (bufferLength == 0) {
       cout << "cliente desconectado" << endl;
       removeClient(cliData);
       break;
     }
+    
+    message += rcvMsgBuffer;
+    while (checkForNewLine(message)) {
+      string msgToSend = message.substr(0, message.find('\n'));
 
-    printf("[msg], %d bytes: %s\n", (int)bufferLength, rcvMsgBuffer);
-    processMessage(cliData, rcvMsgBuffer);
+      //printf("[msg], %d bytes: %s\n", (int)bufferLength, msgToSend);
+      cout << "[msg], " << (int)bufferLength << " bytes: " << msgToSend << endl;
+      processMessage(cliData, msgToSend);
+    
+      message = message.substr(message.find('\n')+1, message.length() - message.find('\n')+1);
+      msgBufferLength = message.length();
+    }
 
   }
   
