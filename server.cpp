@@ -287,7 +287,7 @@ void* clientThread(void *data) {
       string msgToSend = message.substr(0, message.find('\n'));
 
       //printf("[msg], %d bytes: %s\n", (int)bufferLength, msgToSend);
-      cout << "[msg], " << (int)bufferLength << " bytes: " << msgToSend << endl;
+      cout << "[msg], " << msgToSend.length() << " bytes: " << msgToSend << endl;
       processMessage(cliData, msgToSend);
     
       message = message.substr(message.find('\n')+1, message.length() - message.find('\n')+1);
