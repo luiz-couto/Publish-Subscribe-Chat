@@ -74,6 +74,15 @@ SocketData createServer(string proto, string portStr) {
   return serverData;
 }
 
+bool stringHasSpace(string s) {
+  for (const char c : s) {
+    if (isspace(c)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool validateString(const string& s) {
   for (const char c : s) {
     string str(1, c);
@@ -95,9 +104,9 @@ void sendMessage(ClientData  *cliData, string message) {
 int getMessageType(string message) {
   if (!validateString(message)) {
     return INVALID;
-  } else if (message[0] == '+' && message.length() > 1) {
+  } else if (message[0] == '+' && message.length() > 1 && !stringHasSpace(message)) {
     return SUBSCRIBE;
-  } else if (message[0] == '-' && message.length() > 1) {
+  } else if (message[0] == '-' && message.length() > 1 && !stringHasSpace(message)) {
     return UNSUBSCRIBE;
   } else if (message == "##kill") {
     return KILL;
