@@ -272,17 +272,18 @@ void* clientThread(void *data) {
     bufferLength = recv(cliData->clientData->clientSocket, rcvMsgBuffer, BUFSZ - 1, 0);
 
     msgBufferLength += bufferLength;
-    if (msgBufferLength > 500) {
-      cout << "Client disconnect: msg too long" << endl;
-      pthread_exit(EXIT_SUCCESS);
-    
-    } else if (bufferLength == 0) {
+    if (bufferLength == 0) {
       cout << "cliente desconectado" << endl;
       removeClient(cliData);
       break;
     }
-    
+
     message += rcvMsgBuffer;
+    if (!checkForNewLine(message) && message.length() > 500) {
+      cout << "Client disconnect: msg too long" << endl;
+      pthread_exit(EXIT_SUCCESS);
+    
+    }
     while (checkForNewLine(message)) {
       string msgToSend = message.substr(0, message.find('\n'));
 

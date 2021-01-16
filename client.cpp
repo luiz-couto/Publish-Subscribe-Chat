@@ -59,7 +59,6 @@ bool sendMessage(SocketData *clientData, string message) {
 void * sendThread(void *data) {
   SocketData *clientData = (SocketData *)data;
   while(1) {
-    // cout << "> ";
     string message;
     getline(cin, message);
     if (!sendMessage(clientData, message)) {
